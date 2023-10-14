@@ -1545,12 +1545,6 @@ next:
 		pkgconf_pkg_unref(client, pkgdep);
 	}
 
-	if (deplist == &parent->required && (client->flags & PKGCONF_PKG_PKGF_SEARCH_PRIVATE) != PKGCONF_PKG_PKGF_SEARCH_PRIVATE)
-	{
-		PKGCONF_TRACE(client, "%s: walking requires.private list", parent->id);
-		eflags |= pkgconf_pkg_walk_list(client, parent, &parent->requires_private, func, data, depth, skip_flags);
-	}
-
 	return eflags;
 }
 
@@ -1647,6 +1641,22 @@ pkgconf_pkg_traverse_main(pkgconf_client_t *client,
 
 	PKGCONF_TRACE(client, "%s: walking requires list", root->id);
 	eflags = pkgconf_pkg_walk_list(client, root, &root->required, func, data, maxdepth, skip_flags);
+	if (eflags != PKGCONF_PKG_ERRF_OK)
+		return eflags;
+
+	if (client->flags & PKGCONF_PKG_PKGF_SEARCH_PRIVATE)
+	{
+		PKGCONF_TRACE(client, "%s: walking requires.private list", root->id);
+
+		/* XXX: ugly */
+		client->flags |= PKGCONF_PKG_PKGF_ITER_PKG_IS_PRIVATE;
+		eflags = pkgconf_pkg_walk_list(client, root, &root->requires_private, func, data, maxdepth, skip_flags);
+		client->flags &= ~PKGCONF_PKG_PKGF_ITER_PKG_IS_PRIVATE;
+
+		if (eflags != PKGCONF_PKG_ERRF_OK)
+			return eflags;
+	}
+
 	return eflags;
 }
 
@@ -1737,7 +1747,7 @@ pkgconf_pkg_libs_collect(pkgconf_client_t *client, pkgconf_pkg_t *pkg, void *dat
 	PKGCONF_FOREACH_LIST_ENTRY(pkg->libs.head, node)
 	{
 		pkgconf_fragment_t *frag = node->data;
-		pkgconf_fragment_copy(client, list, frag, false);
+		pkgconf_fragment_copy(client, list, frag, (client->flags & PKGCONF_PKG_PKGF_ITER_PKG_IS_PRIVATE) != 0);
 	}
 
 	if (client->flags & PKGCONF_PKG_PKGF_MERGE_PRIVATE_FRAGMENTS)
