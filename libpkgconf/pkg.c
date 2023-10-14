@@ -1644,7 +1644,7 @@ pkgconf_pkg_traverse_main(pkgconf_client_t *client,
 	if (eflags != PKGCONF_PKG_ERRF_OK)
 		return eflags;
 
-	if (client->flags & PKGCONF_PKG_PKGF_SEARCH_PRIVATE)
+	if (client->flags & PKGCONF_PKG_PKGF_SEARCH_PRIVATE && root != data)
 	{
 		PKGCONF_TRACE(client, "%s: walking requires.private list", root->id);
 
