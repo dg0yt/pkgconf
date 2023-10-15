@@ -1507,7 +1507,7 @@ pkgconf_pkg_walk_list(pkgconf_client_t *client,
 		if (pkgdep == NULL)
 			continue;
 
-		if (pkgdep->serial == client->serial && !(parent->flags & PKGCONF_PKG_PROPF_VIRTUAL))
+		if (pkgdep->serial > client->serial && !(parent->flags & PKGCONF_PKG_PROPF_VIRTUAL))
 		{
 			pkgdep->identifier = ++client->identifier;
 
