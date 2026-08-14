@@ -1,0 +1,4 @@
+Environment: PKG_CONFIG_PATH=%TEST_FIXTURES_DIR%/lib1%DIR_SEP%%TEST_FIXTURES_DIR%/lib2%DIR_SEP%%TEST_FIXTURES_DIR%/no-such-dir
+WantedFlags: exists
+Query: bar
+ExpectedExitCode: 0
